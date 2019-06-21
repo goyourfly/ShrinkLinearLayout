@@ -1,6 +1,6 @@
 # ShirkLinearLayout
 
-ShirkLinearLayout 是一个自定 LinearLayout 它的目的是当 LinearLayout 的子 View 高度超过 LinearLayout 的高度时，让子 View 按照一定的比例缩放
+ShirkLinearLayout 是一个自定 LinearLayout，它的目的是当 LinearLayout 的子 View 高度超过 LinearLayout 的高度时，让子 View 按照一定的比例缩放
 
 ### Demo
  ![](./screenshot.gif)
