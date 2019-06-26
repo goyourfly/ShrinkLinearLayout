@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -27,17 +26,19 @@ class ShirkLinearLayout : LinearLayout {
     constructor(context: Context, attributeSet: AttributeSet, defStyleAttr: Int) : super(context, attributeSet, defStyleAttr)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val widthSize = View.MeasureSpec.getSize(widthMeasureSpec)
-        val heightSize = View.MeasureSpec.getSize(heightMeasureSpec)
+        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            val lp = child.layoutParams as LayoutParams
+            lp.resetToOriginSize()
+        }
 
         val childrenSize = getChildrenSizeWithMargin(widthMeasureSpec, heightMeasureSpec)
         val overflowSize = if (orientation == VERTICAL) childrenSize - heightSize else childrenSize - widthSize
         val shirkSum = getShirkSum()
-        for (i in 0 until childCount) {
-            val child = getChildAt(i)
-            val lp = child.layoutParams as LayoutParams
-            lp.resetToOriginSize(orientation)
-        }
+
         if (overflowSize > 0) {
             tryShirk(overflowSize, shirkSum)
         }
@@ -51,7 +52,7 @@ class ShirkLinearLayout : LinearLayout {
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             val lp = child.layoutParams as LayoutParams
-            val lpSize = getLpSize(lp)
+            var lpSize = getLpSize(lp)
             val lpMarginStart = getLpMarginStart(lp)
             val lpMarginEnd = getLpMarginEnd(lp)
             if (lpSize == 0) {
@@ -63,13 +64,13 @@ class ShirkLinearLayout : LinearLayout {
                 if (lpSize < 0) {
                     val size = getSize(child)
                     setLpSize(lp, size)
+                    lpSize = getLpSize(lp)
                 }
                 val percent = shirk / shirkSumTemp
                 var shirkSize = Math.ceil((percent * overflowSize).toDouble()).toInt()
                 // - Bottom margin
                 if (shirkSize > 0) {
                     val s = Math.min(lpMarginEnd, shirkSize)
-                    Log.d(TAG, "ShirkSize:$shirkSize,SSS:$s")
                     setLpMarginEnd(lp, lpMarginEnd - s)
                     shirkSize -= s
                     overflowSizeTemp -= s
@@ -88,7 +89,7 @@ class ShirkLinearLayout : LinearLayout {
                     shirkSize -= s
                     overflowSizeTemp -= s
                 }
-                if(shirkSize > 0){
+                if (shirkSize > 0) {
                     shirkSumTemp -= shirk
                 }
             }
@@ -131,24 +132,13 @@ class ShirkLinearLayout : LinearLayout {
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             val lp = child.layoutParams as LayoutParams
-            if (lp.maxSize >= 0) {
-                size += lp.maxSize
+            measureChild(child, widthMeasureSpec, heightMeasureSpec)
+            val childSize = if (orientation == VERTICAL) {
+                child.measuredHeight + lp.topMargin + lp.bottomMargin
             } else {
-                measureChild(child, widthMeasureSpec, heightMeasureSpec)
-                val childSize = if (orientation == VERTICAL) {
-                    lp.originSize = lp.height
-                    lp.originMarginStart = lp.topMargin
-                    lp.originMarginEnd = lp.bottomMargin
-                    child.measuredHeight + lp.topMargin + lp.bottomMargin
-                } else {
-                    lp.originSize = lp.width
-                    lp.originMarginStart = lp.leftMargin
-                    lp.originMarginEnd = lp.rightMargin
-                    child.measuredWidth + lp.leftMargin + lp.rightMargin
-                }
-                lp.maxSize = childSize
-                size += childSize
+                child.measuredWidth + lp.leftMargin + lp.rightMargin
             }
+            size += childSize
         }
         return size;
     }
@@ -164,39 +154,66 @@ class ShirkLinearLayout : LinearLayout {
     }
 
     override fun generateLayoutParams(attrs: AttributeSet): LayoutParams {
-        return LayoutParams(context, attrs)
+        val lp = LayoutParams(context, attrs)
+        lp.backup()
+        return lp
     }
 
     override fun generateDefaultLayoutParams(): LayoutParams? {
         if (orientation == HORIZONTAL) {
-            return LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+            val lp = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+            lp.backup()
+            return lp
         } else if (orientation == VERTICAL) {
-            return LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+            val lp = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+            lp.backup()
+            return lp
         }
         return null
     }
 
     override fun generateLayoutParams(lp: ViewGroup.LayoutParams): LayoutParams {
-        return LayoutParams(lp)
+        val lpNew = LayoutParams(lp)
+        lpNew.backup()
+        return lpNew
     }
 
 
     class LayoutParams : LinearLayout.LayoutParams {
         var shirk = 0F
-        var maxSize = -1;
-        var originSize = -1;
-        var originMarginStart = -1;
-        var originMarginEnd = -1;
 
-        fun resetToOriginSize(orientation: Int) {
-            if (orientation == VERTICAL) {
-                height = originSize
-                topMargin = originMarginStart
-                bottomMargin = originMarginEnd
-            } else {
-                width = originSize
-                leftMargin = originMarginStart
-                rightMargin = originMarginEnd
+        private var backupLayoutPrams: LayoutParams? = null
+
+        fun resetToOriginSize() {
+            backupLayoutPrams?.let {
+                this.leftMargin = it.leftMargin
+                this.topMargin = it.topMargin
+                this.rightMargin = it.rightMargin
+                this.bottomMargin = it.bottomMargin
+                this.width = it.width
+                this.height = it.height
+                this.shirk = it.shirk
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    this.marginStart = it.marginStart
+                    this.marginEnd = it.marginEnd
+                }
+            }
+        }
+
+        fun backup() {
+            backupLayoutPrams = LayoutParams(this as MarginLayoutParams)
+            backupLayoutPrams?.let {
+                it.width = width
+                it.height = height
+                it.leftMargin = leftMargin
+                it.topMargin = topMargin
+                it.rightMargin = rightMargin
+                it.bottomMargin = bottomMargin
+                it.shirk = shirk
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    it.marginStart = marginStart
+                    it.marginEnd = marginEnd
+                }
             }
         }
 
@@ -214,12 +231,22 @@ class ShirkLinearLayout : LinearLayout {
 
         constructor(width: Int, height: Int, weight: Float) : super(width, height, weight)
 
-        constructor(p: ViewGroup.LayoutParams) : super(p)
+        constructor(p: ViewGroup.LayoutParams) : super(p) {
+            if (p is LayoutParams) {
+                this.shirk = p.shirk
+            }
+        }
 
-        constructor(p: ViewGroup.MarginLayoutParams) : super(p)
+        constructor(p: ViewGroup.MarginLayoutParams) : super(p) {
+            if (p is LayoutParams) {
+                this.shirk = p.shirk
+            }
+        }
 
         @RequiresApi(Build.VERSION_CODES.KITKAT)
-        constructor(source: LayoutParams) : super(source)
+        constructor(source: LayoutParams) : super(source) {
+            this.shirk = source.shirk
+        }
 
         companion object {
             /**
