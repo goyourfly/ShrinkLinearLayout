@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
@@ -48,7 +49,7 @@ class ShirkLinearLayout : LinearLayout {
     private fun tryShirk(overflowSize: Int, shirtSum: Float) {
         var overflowSizeTemp = overflowSize
         var shirkSumTemp = shirtSum
-        var allZero = true
+        var canShirk = false
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             val lp = child.layoutParams as LayoutParams
@@ -58,7 +59,6 @@ class ShirkLinearLayout : LinearLayout {
             if (lpSize == 0) {
                 continue
             }
-            allZero = false
             val shirk = lp.shirk
             if (shirk > 0) {
                 if (lpSize < 0) {
@@ -74,6 +74,10 @@ class ShirkLinearLayout : LinearLayout {
                     setLpMarginEnd(lp, lpMarginEnd - s)
                     shirkSize -= s
                     overflowSizeTemp -= s
+
+                    if(getLpMarginEnd(lp) > 0){
+                        canShirk = true
+                    }
                 }
                 // - Top margin
                 if (shirkSize > 0) {
@@ -81,6 +85,9 @@ class ShirkLinearLayout : LinearLayout {
                     setLpMarginStart(lp, Math.max(0, lpMarginStart - s))
                     shirkSize -= s
                     overflowSizeTemp -= s
+                    if(getLpMarginStart(lp) > 0){
+                        canShirk = true
+                    }
                 }
                 // -
                 if (shirkSize > 0) {
@@ -88,13 +95,17 @@ class ShirkLinearLayout : LinearLayout {
                     setLpSize(lp, lpSize - s)
                     shirkSize -= s
                     overflowSizeTemp -= s
+                    if(getLpSize(lp) > 0){
+                        canShirk = true
+                    }
                 }
                 if (shirkSize > 0) {
                     shirkSumTemp -= shirk
                 }
             }
         }
-        if (!allZero && overflowSizeTemp > 0) {
+        if (canShirk && overflowSizeTemp > 0) {
+            Log.d(TAG,"AllZero:$canShirk,overflowSize:$overflowSize")
             tryShirk(overflowSizeTemp, shirkSumTemp)
         }
     }
