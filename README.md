@@ -1,9 +1,31 @@
 # ShirkLinearLayout
 
+[![](https://jitpack.io/v/goyourfly/ShirkLinearLayout.svg)](https://jitpack.io/#goyourfly/ShirkLinearLayout)
+
+
 ShirkLinearLayout 是一个自定 LinearLayout，它的目的是当 LinearLayout 的子 View 高度超过 LinearLayout 的高度时，让子 View 按照一定的比例缩放
 
 ### Demo
  ![](./screenshot.gif)
+ 
+### Download
+
+Step 1. Add the JitPack repository to your build file
+````
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
+}
+````
+
+Step 2. Add the dependency
+````
+dependencies {
+    implementation 'com.github.goyourfly:ShirkLinearLayout:Tag'
+}
+````
 
 ### Usage
 一般和 LinearLayout 使用方法完全一致，但是多了一个 `shirk` 属性，通过 shirk 配置缩放强度，如果是 `0` 或者 `froze`，则不缩放
