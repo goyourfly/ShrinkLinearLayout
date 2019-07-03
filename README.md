@@ -23,7 +23,7 @@ allprojects {
 Step 2. Add the dependency
 ````
 dependencies {
-    implementation 'com.github.goyourfly:ShirkLinearLayout:Tag'
+    implementation 'com.github.goyourfly:ShirkLinearLayout:1.0'
 }
 ````
 
