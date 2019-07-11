@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="shirk" format="float">
+    <attr name="shrink" format="float">
         <enum name="frozen" value="0"/>
     </attr>
-    <declare-styleable name="ShirkLinearLayout_Layout">
-        <attr name="shirk"/>
+    <declare-styleable name="ShrinkLinearLayout_Layout">
+        <attr name="shrink"/>
     </declare-styleable>
 </resources>

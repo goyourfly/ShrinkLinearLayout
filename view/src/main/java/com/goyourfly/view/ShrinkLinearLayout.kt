@@ -9,14 +9,14 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 
 /**
- * ShirkLinearLayout 是一个自定 LinearLayout
+ * ShrinkLinearLayout 是一个自定 LinearLayout
  * 它的目的是当 LinearLayout 的子 View 高度超过
  * LinearLayout 的高度时，让子 View 按照一定的比
  * 例缩放，同时如果子 View
  */
-class ShirkLinearLayout : LinearLayout {
+class ShrinkLinearLayout : LinearLayout {
     companion object {
-        val TAG = "ShirkLinearLayout"
+        val TAG = "ShrinkLinearLayout"
     }
 
     constructor(context: Context) : super(context)
@@ -37,18 +37,18 @@ class ShirkLinearLayout : LinearLayout {
 
         val childrenSize = getChildrenSizeWithMargin(widthMeasureSpec, heightMeasureSpec)
         val overflowSize = if (orientation == VERTICAL) childrenSize - heightSize else childrenSize - widthSize
-        val shirkSum = getShirkSum()
+        val shrinkSum = getShrinkSum()
 
         if (overflowSize > 0) {
-            tryShirk(overflowSize, shirkSum)
+            tryShrink(overflowSize, shrinkSum)
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
-    private fun tryShirk(overflowSize: Int, shirtSum: Float) {
+    private fun tryShrink(overflowSize: Int, shirtSum: Float) {
         var overflowSizeTemp = overflowSize
-        var shirkSumTemp = shirtSum
-        var canShirk = false
+        var shrinkSumTemp = shirtSum
+        var canShrink = false
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             val lp = child.layoutParams as LayoutParams
@@ -58,53 +58,53 @@ class ShirkLinearLayout : LinearLayout {
             if (lpSize == 0) {
                 continue
             }
-            val shirk = lp.shirk
-            if (shirk > 0) {
+            val shrink = lp.shrink
+            if (shrink > 0) {
                 if (lpSize < 0) {
                     val size = getSize(child)
                     setLpSize(lp, size)
                     lpSize = getLpSize(lp)
                 }
-                val percent = shirk / shirkSumTemp
-                var shirkSize = Math.ceil((percent * overflowSize).toDouble()).toInt()
+                val percent = shrink / shrinkSumTemp
+                var shrinkSize = Math.ceil((percent * overflowSize).toDouble()).toInt()
                 // - Bottom margin
-                if (shirkSize > 0) {
-                    val s = Math.min(lpMarginEnd, shirkSize)
+                if (shrinkSize > 0) {
+                    val s = Math.min(lpMarginEnd, shrinkSize)
                     setLpMarginEnd(lp, lpMarginEnd - s)
-                    shirkSize -= s
+                    shrinkSize -= s
                     overflowSizeTemp -= s
 
                     if(getLpMarginEnd(lp) > 0){
-                        canShirk = true
+                        canShrink = true
                     }
                 }
                 // - Top margin
-                if (shirkSize > 0) {
-                    val s = Math.min(lpMarginStart, shirkSize)
+                if (shrinkSize > 0) {
+                    val s = Math.min(lpMarginStart, shrinkSize)
                     setLpMarginStart(lp, Math.max(0, lpMarginStart - s))
-                    shirkSize -= s
+                    shrinkSize -= s
                     overflowSizeTemp -= s
                     if(getLpMarginStart(lp) > 0){
-                        canShirk = true
+                        canShrink = true
                     }
                 }
                 // -
-                if (shirkSize > 0) {
-                    val s = Math.min(lpSize, shirkSize)
+                if (shrinkSize > 0) {
+                    val s = Math.min(lpSize, shrinkSize)
                     setLpSize(lp, lpSize - s)
-                    shirkSize -= s
+                    shrinkSize -= s
                     overflowSizeTemp -= s
                     if(getLpSize(lp) > 0){
-                        canShirk = true
+                        canShrink = true
                     }
                 }
-                if (shirkSize > 0) {
-                    shirkSumTemp -= shirk
+                if (shrinkSize > 0) {
+                    shrinkSumTemp -= shrink
                 }
             }
         }
-        if (canShirk && overflowSizeTemp > 0) {
-            tryShirk(overflowSizeTemp, shirkSumTemp)
+        if (canShrink && overflowSizeTemp > 0) {
+            tryShrink(overflowSizeTemp, shrinkSumTemp)
         }
     }
 
@@ -152,13 +152,13 @@ class ShirkLinearLayout : LinearLayout {
         return size;
     }
 
-    private fun getShirkSum(): Float {
+    private fun getShrinkSum(): Float {
         return (0 until childCount).map {
             val child = getChildAt(it)
             return@map child
         }.sumByDouble {
             val lp = it.layoutParams as LayoutParams
-            return@sumByDouble lp.shirk.toDouble()
+            return@sumByDouble lp.shrink.toDouble()
         }.toFloat()
     }
 
@@ -189,7 +189,7 @@ class ShirkLinearLayout : LinearLayout {
 
 
     class LayoutParams : LinearLayout.LayoutParams {
-        var shirk = 0F
+        var shrink = 0F
 
         private var backupLayoutPrams: LayoutParams? = null
 
@@ -201,7 +201,7 @@ class ShirkLinearLayout : LinearLayout {
                 this.bottomMargin = it.bottomMargin
                 this.width = it.width
                 this.height = it.height
-                this.shirk = it.shirk
+                this.shrink = it.shrink
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     this.marginStart = it.marginStart
                     this.marginEnd = it.marginEnd
@@ -218,7 +218,7 @@ class ShirkLinearLayout : LinearLayout {
                 it.topMargin = topMargin
                 it.rightMargin = rightMargin
                 it.bottomMargin = bottomMargin
-                it.shirk = shirk
+                it.shrink = shrink
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     it.marginStart = marginStart
                     it.marginEnd = marginEnd
@@ -227,9 +227,9 @@ class ShirkLinearLayout : LinearLayout {
         }
 
         constructor (c: Context, attrs: AttributeSet) : super(c, attrs) {
-            c.obtainStyledAttributes(attrs, R.styleable.ShirkLinearLayout_Layout).apply {
+            c.obtainStyledAttributes(attrs, R.styleable.ShrinkLinearLayout_Layout).apply {
                 try {
-                    shirk = getFloat(R.styleable.ShirkLinearLayout_Layout_shirk, 0F)
+                    shrink = getFloat(R.styleable.ShrinkLinearLayout_Layout_shrink, 0F)
                 } finally {
                     recycle()
                 }
@@ -242,19 +242,19 @@ class ShirkLinearLayout : LinearLayout {
 
         constructor(p: ViewGroup.LayoutParams) : super(p) {
             if (p is LayoutParams) {
-                this.shirk = p.shirk
+                this.shrink = p.shrink
             }
         }
 
         constructor(p: ViewGroup.MarginLayoutParams) : super(p) {
             if (p is LayoutParams) {
-                this.shirk = p.shirk
+                this.shrink = p.shrink
             }
         }
 
         @RequiresApi(Build.VERSION_CODES.KITKAT)
         constructor(source: LayoutParams) : super(source) {
-            this.shirk = source.shirk
+            this.shrink = source.shrink
         }
 
         companion object {

@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
 
-    <com.goyourfly.view.ShirkLinearLayout
+    <com.goyourfly.view.ShrinkLinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="500dp"
@@ -19,21 +19,22 @@
             android:layout_height="200dp"
             android:background="#673AB7"
             android:gravity="center"
-            android:text="Shirk"
+            android:text="Shrink"
             android:textColor="@android:color/white"
             android:textSize="40dp"
-            app:shirk="1" />
+            app:shrink="1" />
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:background="#9C27B0"
             android:gravity="center"
+            android:layout_marginTop="40dp"
             android:src="@drawable/ic_launcher_foreground"
             android:text="A"
             android:textColor="@android:color/white"
             android:textSize="40dp"
-            app:shirk="2" />
+            app:shrink="2" />
 
         <TextView
             android:layout_width="match_parent"
@@ -44,9 +45,9 @@
             android:src="@drawable/ic_launcher_foreground"
             android:text="Froze"
             android:textColor="@android:color/white"
-            app:shirk="frozen" />
+            app:shrink="frozen" />
 
-    </com.goyourfly.view.ShirkLinearLayout>
+    </com.goyourfly.view.ShrinkLinearLayout>
 
 
     <SeekBar
