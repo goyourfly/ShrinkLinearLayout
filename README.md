@@ -1,9 +1,8 @@
 # ShrinkLinearLayout
 
-[![](https://jitpack.io/v/goyourfly/ShirkLinearLayout.svg)](https://jitpack.io/#goyourfly/ShirkLinearLayout)
+[![](https://jitpack.io/v/goyourfly/ShrinkLinearLayout.svg)](https://jitpack.io/#goyourfly/ShrinkLinearLayout)
 
 
-ShirkLinearLayout 是一个自定 LinearLayout，它的目的是当 LinearLayout 的子 View 高度超过 LinearLayout 的高度时，让子 View 按照一定的比例缩放
 ShrinkLinearLayout 是一个自定 LinearLayout，它的目的是当 LinearLayout 的子 View 高度超过 LinearLayout 的高度时，让子 View 按照一定的比例缩放
 
 ### Demo
@@ -24,15 +23,15 @@ allprojects {
 Step 2. Add the dependency
 ````
 dependencies {
-    implementation 'com.github.goyourfly:ShirkLinearLayout:1.0'
+    implementation 'com.github.goyourfly:ShrinkLinearLayout:1.1'
 }
 ````
 
 ### Usage
-一般和 LinearLayout 使用方法完全一致，但是多了一个 `shirk` 属性，通过 shirk 配置缩放强度，如果是 `0` 或者 `froze`，则不缩放
+一般和 LinearLayout 使用方法完全一致，但是多了一个 `shrink` 属性，通过 shrink 配置缩放强度，如果是 `0` 或者 `froze`，则不缩放
 
 ````
-    <com.goyourfly.view.ShirkLinearLayout
+    <com.goyourfly.view.ShrinkLinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="500dp"
